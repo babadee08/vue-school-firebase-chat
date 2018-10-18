@@ -35,6 +35,7 @@
  </div>
 
  <script type="text/javascript">
+  
   const config = {
      apiKey: "AIzaSyA3lxuUq3UqnOLpPdOlqCffOWsb-iDXwhM",
      authDomain: "vue-school-chat-room-11764.firebaseapp.com",
@@ -43,8 +44,12 @@
      storageBucket: "vue-school-chat-room-11764.appspot.com",
      messagingSenderId: "481593161121"
    };
+   
    firebase.initializeApp(config);
+
    const database = firebase.database()
+   const messageRef = database.ref('messages')
+   
    new Vue({
     el: "#chat",
       data: {
@@ -55,12 +60,13 @@
  
      methods: {
        storeMessage () {
-        this.messages.push({text: this.messageText, nickname: this.nickname})
+        // this.messages.push({text: this.messageText, nickname: this.nickname})
+        messageRef.push().set({text: this.messageText, nickname: this.nickname})
         this.messageText = ''
       }
     },
      created () {
-      database.ref('messages').on('child_added', snapshot => this.messages.push(snapshot.val()))
+      messageRef.on('child_added', snapshot => this.messages.push(snapshot.val()))
     }
   })
 </script>
