@@ -4,7 +4,9 @@
   <title>Vue School Chat Room</title>
   <script src="https://unpkg.com/vue"></script>
   <script src="https://www.gstatic.com/firebasejs/5.5.4/firebase.js"></script>
+  <script src="https://unpkg.com/native-toast@2.0.0/dist/native-toast.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/native-toast@2.0.0/dist/native-toast.css">
 </head>
 <body>
  <div id="chat" class="container">
@@ -97,15 +99,40 @@
       }
     },
      created () {
-      messageRef.on('child_added', snapshot => this.messages.push({...snapshot.val(), id: snapshot.key}))
+      messageRef.on('child_added', snapshot => {
+        this.messages.push({...snapshot.val(), id: snapshot.key})
+
+        if (snapshot.val().nickname !== this.nickname) {
+          nativeToast({
+            message: `New Message by ${snapshot.val().nickname}`,
+            // position: 'north-east',
+            // Self destroy in 5 seconds
+            // timeout: 5000,
+            type: 'success'
+          })
+        }
+      })
       messageRef.on('child_removed', snapshot => {
         const deletedMessage = this.messages.find(message => message.id === snapshot.key)
         const index = this.messages.indexOf(deletedMessage)
         this.messages.splice(index, 1)
+
+        if (snapshot.val().nickname !== this.nickname) {
+          nativeToast({
+            message: `Message deleted by ${snapshot.val().nickname}`,
+            type: 'warning'
+          })
+        }
       })
       messageRef.on('child_changed', snapshot => {
         const updatedMessage = this.messages.find(message => message.id === snapshot.key)
         updatedMessage.text = snapshot.val().text
+        if (snapshot.val().nickname !== this.nickname) {
+          nativeToast({
+            message: `Message edited by ${snapshot.val().nickname}`,
+            type: 'info'
+          })
+        }
       })
     }
   })
